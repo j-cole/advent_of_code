@@ -15,6 +15,29 @@ pub fn part_1() {
     println!("IntCode at position 0: {}", result[0]);
 }
 
+#[allow(dead_code)]
+pub fn part_2() {
+    let location = "input/year_2019/day_2_1.txt";
+    let input: Vec<usize> = fs::read_to_string(location)
+        .expect("Cannot read input file")
+        .split(",")
+        .map(|s| s.to_string())
+        .filter_map(|s| s.parse::<usize>().ok())
+        .collect::<Vec<usize>>();
+    for noun in 0..=99 {
+        for verb in 0..=99 {
+            let mut input_loop = input.clone();
+            input_loop[1] = noun;
+            input_loop[2] = verb;
+            let result = process_intcode(input_loop)[0];
+            if result == 19690720 {
+                println!("noun: {}, verb: {}", noun, verb);
+                break;
+            }
+        }
+    }
+}
+
 fn process_intcode(input: Vec<usize>) -> Vec<usize> {
     let mut result = input.clone();
     let mut index = 0;
