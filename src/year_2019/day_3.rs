@@ -3,21 +3,42 @@ use std::fs;
 #[allow(dead_code)]
 pub fn part_1() {
     let location = "input/year_2019/day_3_1.txt";
-    let input: String  = fs::read_to_string(location)
-        .expect("Cannot read input file");
-    let mut wires = input
-        .lines()
-        .map(|l| get_wire_from_line(l));
-    let wire1 = wires.next().expect("Missing input line 1");
-    let wire2 = wires.next().expect("Missing input line 2");
-    let distance = manhattan_distance(wire1, wire2);
+    let input: String = fs::read_to_string(location).expect("Cannot read input file");
+    let mut wires = input.lines();
+    let points1 = parse_points(wires.next().expect("Missing input line 1"));
+    let points2 = parse_points(wires.next().expect("Missing input line 2"));
+    let distance = manhattan_distance(points1, points2);
     println!("The manhattan distance is: {}", distance);
 }
 
-fn get_wire_from_line(line: &str) -> Vec<Direction> {
-    line.split(",")
+fn parse_points(input: &str) -> Vec<Point> {
+    let mut points: Vec<Point> = vec!(Point { x: 0, y: 0 });
+    let mut current = Point { x: 0, y: 0 };
+    input
+        .split(",")
         .map(|s| Direction::from(s))
-        .collect()
+        .for_each(|d| {
+            current = Point::new(&current, &d);
+            points.push(current);
+        });
+    points
+}
+
+fn manhattan_distance(wire1: Vec<Point>, wire2: Vec<Point>) -> i64 {
+    let mut intersections: Vec<Point> = vec![];
+    for line1 in wire1.windows(2) {
+        for line2 in wire2.windows(2) {
+            if let Some(point) = get_intersection(line1, line2) {
+                intersections.push(point);
+            }
+        }
+    }
+    intersections
+        .iter()
+        .filter(|i| i.x != 0 && i.y != 0)
+        .map(|p| p.x.abs() + p.y.abs())
+        .min()
+        .unwrap_or(0)
 }
 
 enum Direction {
@@ -31,7 +52,10 @@ impl From<&str> for Direction {
     fn from(item: &str) -> Self {
         let mut chars = item.chars();
         let direction: char = chars.next().expect("Cannot parse direction");
-        let distance = chars.collect::<String>().parse::<i64>().expect("Cannot parse distance");
+        let distance = chars
+            .collect::<String>()
+            .parse::<i64>()
+            .expect("Cannot parse distance");
         match direction {
             'U' => Direction::Up(distance),
             'R' => Direction::Right(distance),
@@ -42,88 +66,73 @@ impl From<&str> for Direction {
     }
 }
 
-fn manhattan_distance(wire1: Vec<Direction>, wire2: Vec<Direction>) -> i64 {
-    let lines1 = get_lines(wire1);
-    let lines2 = get_lines(wire2);
-    let mut intersections: Vec<Point> = vec!();
-    for l1 in &lines1 {
-        for l2 in &lines2 {
-            if let Some(point) = l1.find_intersection(l2) {
-                intersections.push(point);
-            }
-        }
-    }
-    intersections
-        .iter()
-        .map(|p| p.x.abs() + p.y.abs())
-        .min()
-        .expect("No valid intersection")
-}
-
-fn get_lines(wire: Vec<Direction>) -> Vec<Line> {
-    let mut lines = vec!();
-    let mut current = Point { x: 0, y: 0 };
-    let mut next = Point { x: 0, y: 0 };
-    for w in wire {
-        match w {
-            Direction::Up(distance) => next.y = next.y + distance,
-            Direction::Right(distance) => next.x = next.x + distance,
-            Direction::Down(distance) => next.y = next.y - distance,
-            Direction::Left(distance) => next.x = next.x - distance,
-        }
-        let line = Line { p1: current, p2: next };
-        lines.push(line);
-        current = next;
-    }
-    lines
-}
-
-#[derive(Debug)]
-struct Line {
-    p1: Point,
-    p2: Point,
-}
-
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 struct Point {
     x: i64,
     y: i64,
 }
 
-impl Line {
-    fn find_intersection(&self, other: &Line) -> Option<Point> {
-        let x1_range = if self.p1.x <= self.p2.x {
-            (self.p1.x ..= self.p2.x)
-        } else {
-            (self.p2.x ..= self.p1.x)
-        };
-        let y1_range = if self.p1.y <= self.p2.y {
-            (self.p1.y ..= self.p2.y)
-        } else {
-            (self.p2.y ..= self.p1.y)
-        };
-        let x2_range = if other.p1.x <= other.p2.x {
-            (other.p1.x ..= other.p2.x)
-        } else {
-            (other.p2.x ..= other.p1.x)
-        };
-        let y2_range = if other.p1.y <= other.p2.y {
-            (other.p1.y ..= other.p2.y)
-        } else {
-            (other.p2.y ..= other.p1.y)
-        };
+impl Point {
+    fn new(point: &Point, dir: &Direction) -> Self {
+        match dir {
+            Direction::Up(distance) => Point {
+                x: point.x,
+                y: point.y + distance,
+            },
+            Direction::Right(distance) => Point {
+                x: point.x + distance,
+                y: point.y,
+            },
+            Direction::Down(distance) => Point {
+                x: point.x,
+                y: point.y - distance,
+            },
+            Direction::Left(distance) => Point {
+                x: point.x - distance,
+                y: point.y,
+            },
+        }
+    }
+}
 
-        if (other.p1.x != 0 || self.p1.y != 0) &&
-            x1_range.contains(&other.p1.x) &&
-            y2_range.contains(&self.p1.y) {
-            Some(Point { x: other.p1.x, y: self.p1.y })
-        } else if (other.p1.y != 0 || self.p1.x != 0) &&
-            y1_range.contains(&other.p1.y) && x2_range.contains(&self.p1.x) {
-            Some(Point { x: self.p1.x, y: other.p1.y })
+fn get_intersection(line1: &[Point], line2: &[Point]) -> Option<Point> {
+    if is_horizontal(&line1[0], &line1[1]) && is_vertical(&line2[0], &line2[1]) {
+        let left = core::cmp::min(line1[0].x, line1[1].x);
+        let right = core::cmp::max(line1[0].x, line1[1].x);
+        let bottom = core::cmp::min(line2[0].y, line2[1].y);
+        let top = core::cmp::max(line2[0].y, line2[1].y);
+        if (left..=right).contains(&line2[0].x) && (bottom..=top).contains(&line1[0].y) {
+            Some(Point {
+                x: line2[0].x,
+                y: line1[0].y,
+            })
         } else {
             None
         }
+    } else if is_vertical(&line1[0], &line1[1]) && is_horizontal(&line2[0], &line2[1]) {
+        let left = core::cmp::min(line2[0].x, line2[1].x);
+        let right = core::cmp::max(line2[0].x, line2[1].x);
+        let bottom = core::cmp::min(line1[0].y, line1[1].y);
+        let top = core::cmp::max(line1[0].y, line1[1].y);
+        if (left..=right).contains(&line1[0].x) && (bottom..=top).contains(&line2[0].y) {
+            Some(Point {
+                x: line1[0].x,
+                y: line2[0].y,
+            })
+        } else {
+            None
+        }
+    } else {
+        None
     }
+}
+
+fn is_vertical(p1: &Point, p2: &Point) -> bool {
+    p1.x == p2.x && p1.y != p2.y
+}
+
+fn is_horizontal(p1: &Point, p2: &Point) -> bool {
+    p1.x != p2.x && p1.y == p2.y
 }
 
 #[cfg(test)]
@@ -132,22 +141,22 @@ mod tests {
 
     #[test]
     fn example_3_1() {
-        let wire1 = get_wire_from_line("R8,U5,L5,D3");
-        let wire2 = get_wire_from_line("U7,R6,D4,L4");
-        assert_eq!(manhattan_distance(wire1, wire2), 6);
+        let points1 = parse_points("R8,U5,L5,D3");
+        let points2 = parse_points("U7,R6,D4,L4");
+        assert_eq!(manhattan_distance(points1, points2), 6);
     }
 
     #[test]
     fn example_3_2() {
-        let wire1 = get_wire_from_line("R75,D30,R83,U83,L12,D49,R71,U7,L72");
-        let wire2 = get_wire_from_line("U62,R66,U55,R34,D71,R55,D58,R83");
-        assert_eq!(manhattan_distance(wire1, wire2), 159);
+        let points1 = parse_points("R75,D30,R83,U83,L12,D49,R71,U7,L72");
+        let points2 = parse_points("U62,R66,U55,R34,D71,R55,D58,R83");
+        assert_eq!(manhattan_distance(points1, points2), 159);
     }
 
     #[test]
     fn example_3_3() {
-        let wire1 = get_wire_from_line("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51");
-        let wire2 = get_wire_from_line("U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
-        assert_eq!(manhattan_distance(wire1, wire2), 135);
+        let points1 = parse_points("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51");
+        let points2 = parse_points("U98,R91,D20,R16,D67,R40,U7,R15,U6,R7");
+        assert_eq!(manhattan_distance(points1, points2), 135);
     }
 }
