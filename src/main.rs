@@ -1,5 +1,5 @@
 mod year_2019;
 
 fn main() {
-    year_2019::day_3::part_1();
+    year_2019::day_3::part_2();
 }
