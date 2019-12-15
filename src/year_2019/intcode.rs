@@ -60,25 +60,41 @@ impl Intcode {
         if self.halt { 
             return;
         }
-        if self.memory[self.pc] == 1 {
-            // process Add
-            let src1 = self.memory[self.pc + 1];
-            let src2 = self.memory[self.pc + 2];
-            let dest = self.memory[self.pc + 3];
-            self.memory[dest] = self.memory[src1] + self.memory[src2];
-            self.pc += 4;
-        } else if self.memory[self.pc] == 2 {
-            // process Multiply
-            let src1 = self.memory[self.pc + 1];
-            let src2 = self.memory[self.pc + 2];
-            let dest = self.memory[self.pc + 3];
-            self.memory[dest] = self.memory[src1] * self.memory[src2];
-            self.pc += 4;
-        } else if self.memory[self.pc] == 99 {
-            // process Finish
-            self.halt = true;
-        } else {
-            panic!();
+        let opcode = self.read_opcode();
+        self.process_opcode(&opcode);
+    }
+
+    fn read_opcode(&self) -> Opcode {
+        let opcode_id = self.memory[self.pc];
+        match opcode_id {
+            1 => Opcode::Add(AddParams {
+                    src1: self.memory[self.pc + 1],
+                    src2: self.memory[self.pc + 2],
+                    dst: self.memory[self.pc + 3],
+                }),
+            2 => Opcode::Mult(MultParams {
+                    src1: self.memory[self.pc + 1],
+                    src2: self.memory[self.pc + 2],
+                    dst: self.memory[self.pc + 3],
+                }),
+            99 => Opcode::Halt,
+            _ => panic!(),
+        }
+    }
+
+    fn process_opcode(&mut self, opcode: &Opcode) {
+        match opcode {
+            Opcode::Add(ref add_params) => {
+                self.memory[add_params.dst] = self.memory[add_params.src1] + self.memory[add_params.src2];
+                self.pc += 4;
+            }
+            Opcode::Mult(ref mult_params) => {
+                self.memory[mult_params.dst] = self.memory[mult_params.src1] * self.memory[mult_params.src2];
+                self.pc += 4;
+            }
+            Opcode::Halt => {
+                self.halt = true;
+            }
         }
     }
 
@@ -87,4 +103,22 @@ impl Intcode {
             self.step();
         }
     }
+}
+
+enum Opcode {
+    Add(AddParams),
+    Mult(MultParams),
+    Halt,
+}
+
+struct MultParams {
+    src1: usize,
+    src2: usize,
+    dst: usize,
+}
+
+struct AddParams {
+    src1: usize,
+    src2: usize,
+    dst: usize,
 }
