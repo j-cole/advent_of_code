@@ -1,5 +1,5 @@
-use std::fs;
 use crate::year_2019::intcode::Intcode;
+use std::fs;
 
 #[allow(dead_code)]
 pub fn part_1() {
@@ -54,9 +54,7 @@ mod tests {
         let input = vec![1, 0, 0, 0, 99];
         let output = vec![2, 0, 0, 0, 99];
         let mut intcode = Intcode::new(input).unwrap();
-        intcode
-            .reset()
-            .run();
+        intcode.reset().run();
         assert_eq!(intcode.dump(), output);
     }
 
@@ -65,9 +63,7 @@ mod tests {
         let input = vec![2, 3, 0, 3, 99];
         let output = vec![2, 3, 0, 6, 99];
         let mut intcode = Intcode::new(input).unwrap();
-        intcode
-            .reset()
-            .run();
+        intcode.reset().run();
         assert_eq!(intcode.dump(), output);
     }
 
@@ -76,9 +72,7 @@ mod tests {
         let input = vec![2, 4, 4, 5, 99, 0];
         let output = vec![2, 4, 4, 5, 99, 9801];
         let mut intcode = Intcode::new(input).unwrap();
-        intcode
-            .reset()
-            .run();
+        intcode.reset().run();
         assert_eq!(intcode.dump(), output);
     }
 
@@ -87,9 +81,7 @@ mod tests {
         let input = vec![1, 1, 1, 4, 99, 5, 6, 0, 99];
         let output = vec![30, 1, 1, 4, 2, 5, 6, 0, 99];
         let mut intcode = Intcode::new(input).unwrap();
-        intcode
-            .reset()
-            .run();
+        intcode.reset().run();
         assert_eq!(intcode.dump(), output);
     }
 
@@ -98,9 +90,7 @@ mod tests {
         let input = vec![1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
         let output = vec![3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50];
         let mut intcode = Intcode::new(input).unwrap();
-        intcode
-            .reset()
-            .run();
+        intcode.reset().run();
         assert_eq!(intcode.dump(), output);
     }
 }

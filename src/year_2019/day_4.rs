@@ -1,18 +1,14 @@
 #[allow(dead_code)]
 pub fn part_1() {
-    let input = 156218 ..= 652527;
-    let count = input.into_iter()
-        .filter(|&pw| check_password_1(pw))
-        .count();
+    let input = 156218..=652527;
+    let count = input.into_iter().filter(|&pw| check_password_1(pw)).count();
     println!("Valid passwords: {}", count);
 }
 
 #[allow(dead_code)]
 pub fn part_2() {
-    let input = 156218 ..= 652527;
-    let count = input.into_iter()
-        .filter(|&pw| check_password_2(pw))
-        .count();
+    let input = 156218..=652527;
+    let count = input.into_iter().filter(|&pw| check_password_2(pw)).count();
     println!("Valid passwords: {}", count);
 }
 
@@ -23,17 +19,12 @@ fn check_password_1(password: u64) -> bool {
         return false;
     }
     // condition 2
-    let no_doubles = digits
-        .windows(2)
-        .all(|w| w[0] != w[1]);
+    let no_doubles = digits.windows(2).all(|w| w[0] != w[1]);
     if no_doubles {
         return false;
     }
     // condition 3
-    let count = digits
-        .windows(2)
-        .filter(|&w| { w[1] < w[0] })
-        .count();
+    let count = digits.windows(2).filter(|&w| w[1] < w[0]).count();
     let any_decreasing = count != 0;
     if any_decreasing {
         return false;
@@ -48,7 +39,7 @@ fn check_password_2(password: u64) -> bool {
         return false;
     }
     // condition 2
-    let mut repeats: Vec<(u8, u8)> = vec!();
+    let mut repeats: Vec<(u8, u8)> = vec![];
     for &d in &digits {
         if let Some(r) = repeats.last_mut() {
             if d == r.0 {
@@ -60,17 +51,12 @@ fn check_password_2(password: u64) -> bool {
             repeats.push((d, 1));
         }
     }
-    let one_double = repeats
-        .iter()
-        .any(|r| r.1 == 2);
+    let one_double = repeats.iter().any(|r| r.1 == 2);
     if !one_double {
         return false;
     }
     // condition 3
-    let count = digits
-        .windows(2)
-        .filter(|&w| { w[1] < w[0] })
-        .count();
+    let count = digits.windows(2).filter(|&w| w[1] < w[0]).count();
     let any_decreasing = count != 0;
     if any_decreasing {
         return false;

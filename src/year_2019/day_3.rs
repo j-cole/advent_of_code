@@ -1,5 +1,5 @@
-use std::fs;
 use core::cmp;
+use std::fs;
 
 #[allow(dead_code)]
 pub fn part_1() {
