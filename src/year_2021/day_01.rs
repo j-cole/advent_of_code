@@ -7,8 +7,11 @@ pub fn part_1() {
     let reader = BufReader::new(file);
     let input: Vec<u64> = reader
         .lines()
-        .filter_map(|l| l.ok())
-        .filter_map(|s| s.parse::<u64>().ok())
+        .map(|line| {
+            line.expect("Could not read line.")
+                .parse::<u64>()
+                .expect("Could not parse line")
+        })
         .collect();
     let result = count_depth_increases(&input);
     println!("Number of depth increases part 1: {}", result);
@@ -20,11 +23,14 @@ pub fn part_2() {
     let reader = BufReader::new(file);
     let input: Vec<u64> = reader
         .lines()
-        .filter_map(|l| l.ok())
-        .filter_map(|s| s.parse::<u64>().ok())
+        .map(|line| {
+            line.expect("Could not read line.")
+                .parse::<u64>()
+                .expect("Could not parse line")
+        })
         .collect();
     let result = count_depth_increases_by_3(&input);
-    println!("Number of depth increases part 1: {}", result);
+    println!("Number of depth increases part 2: {}", result);
 }
 
 fn count_depth_increases(depths: &[u64]) -> usize {
@@ -34,7 +40,7 @@ fn count_depth_increases(depths: &[u64]) -> usize {
 fn count_depth_increases_by_3(depths: &[u64]) -> usize {
     depths
         .windows(3)
-        .map(|w| w[0] + w[1] + w[2])
+        .map(|w| w.iter().sum())
         .collect::<Vec<u64>>()
         .windows(2)
         .filter(|w| w[0] < w[1])
