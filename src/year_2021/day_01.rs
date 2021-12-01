@@ -34,7 +34,7 @@ fn count_depth_increases(depths: &[u64]) -> usize {
 fn count_depth_increases_by_3(depths: &[u64]) -> usize {
     depths
         .windows(3)
-        .map(|w| w[0]+w[1]+w[2])
+        .map(|w| w[0] + w[1] + w[2])
         .collect::<Vec<u64>>()
         .windows(2)
         .filter(|w| w[0] < w[1])

@@ -57,7 +57,7 @@ impl Intcode {
     }
 
     pub fn step(&mut self) {
-        if self.halt { 
+        if self.halt {
             return;
         }
         let opcode = self.read_opcode();
@@ -68,31 +68,31 @@ impl Intcode {
         let opcode_id = self.memory[self.pc];
         match opcode_id % 100 {
             1 => Opcode::Add(AddParams {
-                    src1: if (opcode_id / 100) % 10 == 1 {
-                        self.pc + 1
-                    } else {
-                        self.memory[self.pc + 1] as usize
-                    },
-                    src2: if (opcode_id / 1000) % 10 == 1 {
-                        self.pc + 2
-                    } else {
-                        self.memory[self.pc + 2] as usize
-                    },
-                    dst: self.memory[self.pc + 3] as usize,
-                }),
+                src1: if (opcode_id / 100) % 10 == 1 {
+                    self.pc + 1
+                } else {
+                    self.memory[self.pc + 1] as usize
+                },
+                src2: if (opcode_id / 1000) % 10 == 1 {
+                    self.pc + 2
+                } else {
+                    self.memory[self.pc + 2] as usize
+                },
+                dst: self.memory[self.pc + 3] as usize,
+            }),
             2 => Opcode::Mult(MultParams {
-                    src1: if (opcode_id / 100) % 10 == 1 {
-                        self.pc + 1
-                    } else {
-                        self.memory[self.pc + 1] as usize
-                    },
-                    src2: if (opcode_id / 1000) % 10 == 1 {
-                        self.pc + 2
-                    } else {
-                        self.memory[self.pc + 2] as usize
-                    },
-                    dst: self.memory[self.pc + 3] as usize,
-                }),
+                src1: if (opcode_id / 100) % 10 == 1 {
+                    self.pc + 1
+                } else {
+                    self.memory[self.pc + 1] as usize
+                },
+                src2: if (opcode_id / 1000) % 10 == 1 {
+                    self.pc + 2
+                } else {
+                    self.memory[self.pc + 2] as usize
+                },
+                dst: self.memory[self.pc + 3] as usize,
+            }),
             3 => Opcode::Input(InputParams {
                 dst: self.memory[self.pc + 1] as usize,
             }),
@@ -109,18 +109,20 @@ impl Intcode {
                     println!("{} - {}", index, data);
                 }
                 panic!("Unknown opcode: {} at memory: {}", opcode_id, self.pc)
-            },
+            }
         }
     }
 
     fn process_opcode(&mut self, opcode: &Opcode) {
         match opcode {
             Opcode::Add(ref add_params) => {
-                self.memory[add_params.dst] = self.memory[add_params.src1] + self.memory[add_params.src2];
+                self.memory[add_params.dst] =
+                    self.memory[add_params.src1] + self.memory[add_params.src2];
                 self.pc += 4;
             }
             Opcode::Mult(ref mult_params) => {
-                self.memory[mult_params.dst] = self.memory[mult_params.src1] * self.memory[mult_params.src2];
+                self.memory[mult_params.dst] =
+                    self.memory[mult_params.src1] * self.memory[mult_params.src2];
                 self.pc += 4;
             }
             Opcode::Halt => {
