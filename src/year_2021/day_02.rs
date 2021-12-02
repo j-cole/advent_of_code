@@ -1,6 +1,22 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+#[allow(dead_code)]
+pub fn part_1() {
+    let file = File::open("input/year_2021/day_02_1.txt").expect("Could not open input file.");
+    let reader = BufReader::new(file);
+    let steps: Vec<Step> = reader
+        .lines()
+        .map(|line| line.expect("Could not read line."))
+        .map(|line| parse_step(&line).expect("Could not parse line"))
+        .collect();
+    let mut pos = Position { x: 0, y: 0 };
+    pos.process_all(&steps);
+    let result = pos.x * pos.y;
+    println!("Final position: {}, {}", pos.x, pos.y);
+    println!("Day 02/1 result: {}", result);
+}
+
 #[derive(Debug, Default, PartialEq)]
 struct Position {
     x: u64,
@@ -30,37 +46,17 @@ enum Step {
 }
 
 fn parse_step(line: &str) -> Result<Step, &str> {
-    if line.starts_with("forward ") {
-        Ok(Step::Forward(
-            line[8..].parse::<u64>().expect("Can not parse number"),
-        ))
-    } else if line.starts_with("down ") {
-        Ok(Step::Down(
-            line[5..].parse::<u64>().expect("Can not parse number"),
-        ))
-    } else if line.starts_with("up ") {
-        Ok(Step::Up(
-            line[3..].parse::<u64>().expect("Can not parse number"),
-        ))
+    if let [step_type, value] = line.split(' ').collect::<Vec<&str>>()[..] {
+        let value = value.parse::<u64>().expect("Can not parse number");
+        match step_type {
+            "forward" => Ok(Step::Forward(value)),
+            "down" => Ok(Step::Down(value)),
+            "up" => Ok(Step::Up(value)),
+            _ => Err("Incorrect step type"),
+        }
     } else {
-        Err("Can not parse line")
+        Err("Line format must be 'step_type value'")
     }
-}
-
-#[allow(dead_code)]
-pub fn part_1() {
-    let file = File::open("input/year_2021/day_02_1.txt").expect("Could not open input file.");
-    let reader = BufReader::new(file);
-    let steps: Vec<Step> = reader
-        .lines()
-        .map(|line| line.expect("Could not read line."))
-        .map(|line| parse_step(&line).expect("Could not parse line"))
-        .collect();
-    let mut pos = Position { x: 0, y: 0 };
-    pos.process_all(&steps);
-    let result = pos.x * pos.y;
-    println!("Final position: {}, {}", pos.x, pos.y);
-    println!("Day 02/1 result: {}", result);
 }
 
 #[cfg(test)]
