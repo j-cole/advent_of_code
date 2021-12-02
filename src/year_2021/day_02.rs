@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 #[allow(dead_code)]
-pub fn part_1() {
+pub fn part_1() -> i64 {
     let file = File::open("input/year_2021/day_02_1.txt").expect("Could not open input file.");
     let reader = BufReader::new(file);
     let steps: Vec<Step> = reader
@@ -15,10 +15,11 @@ pub fn part_1() {
     let result = pos.x * pos.y;
     println!("Final position: {}, {}", pos.x, pos.y);
     println!("Day 02/1 result: {}", result);
+    result
 }
 
 #[allow(dead_code)]
-pub fn part_2() {
+pub fn part_2() -> i64 {
     let file = File::open("input/year_2021/day_02_1.txt").expect("Could not open input file.");
     let reader = BufReader::new(file);
     let steps: Vec<Step> = reader
@@ -31,6 +32,7 @@ pub fn part_2() {
     let result = sub.pos.x * sub.pos.y;
     println!("Final position: {}, {}", sub.pos.x, sub.pos.y);
     println!("Day 02/2 result: {}", result);
+    result
 }
 
 enum Step {
@@ -70,7 +72,10 @@ struct Submarine {
 impl Submarine {
     fn process(&mut self, step: &Step) {
         match step {
-            Step::Forward(x) => { self.pos.x += x; self.pos.y += self.aim * x }
+            Step::Forward(x) => {
+                self.pos.x += x;
+                self.pos.y += self.aim * x
+            }
             Step::Down(delta_aim) => self.aim += delta_aim,
             Step::Up(delta_aim) => self.aim -= delta_aim,
         }
@@ -153,5 +158,15 @@ mod tests {
         ];
         sub.process_all(&steps);
         assert_eq!(sub.pos, Position { x: 15, y: 60 });
+    }
+
+    #[test]
+    fn check_answer_part_1() {
+        assert_eq!(part_1(), 2027977);
+    }
+
+    #[test]
+    fn check_answer_part_2() {
+        assert_eq!(part_2(), 1903644897);
     }
 }
