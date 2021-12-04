@@ -27,13 +27,24 @@ fn find_power_consumption(binary_numbers: &[String]) -> i64 {
                     .collect()
             });
 
-    let gamma = ratio
-        .iter()
-        .fold(0, |acc, &r| if 0 < r { 2 * acc + 1 } else { 2 * acc });
-    let epsilon = ratio
-        .iter()
-        .fold(0, |acc, &r| if r < 0 { 2 * acc + 1 } else { 2 * acc });
+    let gamma = get_gamma(&ratio);
+    let epsilon = get_epsilon(&ratio);
     gamma * epsilon
+}
+
+fn get_gamma(ratio: &[i64]) -> i64 {
+    let most_common_bits: String = ratio
+        .iter()
+        .map(|&r| if 0 < r { '1' } else { '0' })
+        .collect();
+    i64::from_str_radix(&most_common_bits, 2).expect("Could not parse gamma")
+}
+fn get_epsilon(ratio: &[i64]) -> i64 {
+    let least_common_bits: String = ratio
+        .iter()
+        .map(|&r| if r < 0 { '1' } else { '0' })
+        .collect();
+    i64::from_str_radix(&least_common_bits, 2).expect("Could not parse epsilon")
 }
 
 #[cfg(test)]
