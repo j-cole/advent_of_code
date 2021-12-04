@@ -4,43 +4,35 @@ use std::io::{BufRead, BufReader};
 #[allow(dead_code)]
 pub fn part_1() -> i64 {
     let file = File::open("input/year_2021/day_03_1.txt").expect("Could not open input file.");
-    let reader = BufReader::new(file);
-    let lines: Vec<String> = reader
-        .lines()
-        .map(|line| {
-            line.expect("Could not read line.").trim().into()
-        })
-        .collect::<Vec<String>>();
-    find_gamma_multiplied_by_epsilon(&lines)
+    let mut reader = BufReader::new(file);
+    let binary_numbers = parse_input(&mut reader);
+    find_power_consumption(&binary_numbers)
 }
 
-fn find_gamma_multiplied_by_epsilon(lines: &[String]) -> i64{
-    let mut counts: Vec<i64> = vec![0; lines[0].len()];
-    for l in lines.iter() {
-        for (i, c) in l.chars().enumerate() {
-            println!("char: {} , pos: {}", c, i);
-            if c == '1' {
-                counts[i] += 1;
-            } else {
-                counts[i] -= 1;
-            }
-        }
+fn parse_input<R: BufRead>(reader: &mut R) -> Vec<String> {
+    reader
+        .lines()
+        .map(|line| line.expect("Could not read line.").trim().to_string())
+        .collect::<Vec<String>>()
+}
 
-    }
-    let mut gamma = 0;
-    for &c in &counts {
-        gamma *= 2;
-        if 0 < c {
-            gamma +=1;
-        }
-    }
-    let mut epsilon = 0;
-    for &c in &counts {
-        epsilon *= 2;
-        if c < 0 {
-            epsilon +=1;
-        }
-    }
+fn find_power_consumption(binary_numbers: &[String]) -> i64 {
+    let ratio: Vec<i64> =
+        binary_numbers
+            .iter()
+            .fold(vec![0; binary_numbers[0].len()], |acc, elem| {
+                acc.iter()
+                    .zip(elem.chars())
+                    .map(|(a, c)| if c == '1' { a + 1 } else { a - 1 })
+                    .collect()
+            });
+
+    let gamma = ratio
+        .iter()
+        .fold(0, |acc, &r| if 0 < r { 2 * acc + 1 } else { 2 * acc });
+    let epsilon = ratio
+        .iter()
+        .fold(0, |acc, &r| if r < 0 { 2 * acc + 1 } else { 2 * acc });
     gamma * epsilon
 }
 
@@ -64,7 +56,7 @@ mod tests {
             String::from("00010"),
             String::from("01010"),
         ];
-        assert_eq!(find_gamma_multiplied_by_epsilon(&input), 198);
+        assert_eq!(find_power_consumption(&input), 198);
     }
 
     #[test]
