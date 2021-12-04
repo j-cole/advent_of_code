@@ -8,6 +8,14 @@ pub fn part_1() -> i64 {
     play_bingo(&mut boards, &random_numbers)
 }
 
+#[allow(dead_code)]
+pub fn part_2() -> i64 {
+    let input =
+        fs::read_to_string("input/year_2021/day_04_1.txt").expect("Could not read input file.");
+    let (random_numbers, mut boards) = parse_input(input);
+    play_bingo_until_last_board(&mut boards, &random_numbers)
+}
+
 fn parse_input(input: String) -> (Vec<i64>, Vec<Board>) {
     let mut lines = input.lines();
     let random_numbers = lines
@@ -81,13 +89,13 @@ impl Board {
                 return Some(row.iter().map(|r| r.0).collect());
             }
         }
+        // check columns
         for i in 0..5 {
             let col = self.rows.iter().map(|row| row[i]).collect::<Vec<_>>();
             if col.iter().all(|c| c.1) {
                 return Some(col.iter().map(|c| c.0).collect());
             }
         }
-        // check columns
         None
     }
 
@@ -110,12 +118,37 @@ fn play_bingo(boards: &mut Vec<Board>, random_nums: &[i64]) -> i64 {
     0
 }
 
+fn play_bingo_until_last_board(boards: &mut Vec<Board>, random_nums: &[i64]) -> i64 {
+    for &rn in random_nums {
+        mark_numbers(boards, rn);
+        let winning_boards = drain_filter_winning_boards(boards);
+        if boards.is_empty() {
+            let sum = winning_boards[0].sum_unmarked_numbers();
+            return sum * rn;
+        }
+    }
+    0
+}
+
 fn mark_numbers(boards: &mut Vec<Board>, num: i64) {
     boards.iter_mut().for_each(|b| b.mark_number(num));
 }
 
 fn find_winning_board(boards: &[Board]) -> Option<&Board> {
     boards.iter().find(|b| b.find_winning_numbers().is_some())
+}
+
+fn drain_filter_winning_boards(boards: &mut Vec<Board>) -> Vec<Board> {
+    let mut winning_boards = vec![];
+    let mut i = 0;
+    while i < boards.len() {
+        if boards[i].find_winning_numbers().is_some() {
+            winning_boards.push(boards.remove(i));
+        } else {
+            i += 1;
+        }
+    }
+    winning_boards
 }
 
 #[cfg(test)]
@@ -157,5 +190,50 @@ mod part_1 {
     #[test]
     fn check_answer_part_1() {
         assert_eq!(part_1(), 60368);
+    }
+}
+
+#[cfg(test)]
+mod part_2 {
+    use super::*;
+
+    #[test]
+    fn check_example_input() {
+        let random_numbers = vec![
+            7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24, 10, 16, 13, 6, 15, 25, 12, 22, 18, 20, 8, 19,
+            3, 26, 1,
+        ];
+        let mut boards = vec![
+            Board::new(
+                vec![22, 13, 17, 11, 0],
+                vec![8, 2, 23, 4, 24],
+                vec![21, 9, 14, 16, 7],
+                vec![6, 10, 3, 18, 5],
+                vec![1, 12, 20, 15, 19],
+            ),
+            Board::new(
+                vec![3, 15, 0, 2, 22],
+                vec![9, 18, 13, 17, 5],
+                vec![19, 8, 7, 25, 23],
+                vec![20, 11, 10, 24, 4],
+                vec![14, 21, 16, 12, 6],
+            ),
+            Board::new(
+                vec![14, 21, 17, 24, 4],
+                vec![10, 16, 15, 9, 19],
+                vec![18, 8, 23, 26, 20],
+                vec![22, 11, 13, 6, 5],
+                vec![2, 0, 12, 3, 7],
+            ),
+        ];
+        assert_eq!(
+            play_bingo_until_last_board(&mut boards, &random_numbers),
+            1924
+        );
+    }
+
+    #[test]
+    fn check_answer() {
+        assert_eq!(part_2(), 17435);
     }
 }
