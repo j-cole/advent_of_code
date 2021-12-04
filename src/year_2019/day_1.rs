@@ -9,7 +9,7 @@ pub fn part_1() {
         .lines()
         .filter_map(|l| l.ok())
         .filter_map(|s| s.parse::<u64>().ok())
-        .map(|u| fuel_for_mass(u))
+        .map(fuel_for_mass)
         .sum();
     println!("Sum of fuel requirements part 1: {}", result);
 }
@@ -22,7 +22,7 @@ pub fn part_2() {
         .lines()
         .filter_map(|l| l.ok())
         .filter_map(|s| s.parse::<u64>().ok())
-        .map(|u| fuel_for_mass_with_extra_fuel(u))
+        .map(fuel_for_mass_with_extra_fuel)
         .sum();
     println!("Sum of fuel requirements part 2: {}", result);
 }
@@ -40,7 +40,7 @@ fn fuel_for_mass_with_extra_fuel(mass: u64) -> u64 {
     let mut total_fuel = 0;
     let mut extra_fuel = fuel_for_mass(mass);
     while 0 < extra_fuel {
-        total_fuel = total_fuel + extra_fuel;
+        total_fuel += extra_fuel;
         extra_fuel = fuel_for_mass(extra_fuel);
     }
     total_fuel

@@ -5,7 +5,7 @@ pub fn part_1() {
     let location = "input/year_2019/day_5_1.txt";
     let input: Vec<i64> = fs::read_to_string(location)
         .expect("Cannot read input file")
-        .split(",")
+        .split(',')
         .map(|s| s.to_string())
         .filter_map(|s| s.parse::<i64>().ok())
         .collect::<Vec<i64>>();

@@ -7,7 +7,7 @@ pub struct Intcode {
 
 impl Intcode {
     pub fn new(initial: Vec<i64>) -> Result<Self, &'static str> {
-        if initial.len() == 0 {
+        if initial.is_empty() {
             Err("Initial memory must contain data.")
         } else {
             Ok(Intcode {
@@ -25,7 +25,7 @@ impl Intcode {
 
     pub fn write_noun(&mut self, noun: i64) -> bool {
         let mut write_sucessful = false;
-        if 1 <= self.memory.len() {
+        if !self.memory.is_empty() {
             self.memory[1] = noun;
             write_sucessful = true;
         }

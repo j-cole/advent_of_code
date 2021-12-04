@@ -26,7 +26,7 @@ pub fn part_2() {
 fn parse_points(input: &str) -> Vec<Point> {
     let mut points: Vec<Point> = vec![Point { x: 0, y: 0 }];
     let mut current = Point { x: 0, y: 0 };
-    input.split(",").map(|s| Direction::from(s)).for_each(|d| {
+    input.split(',').map(Direction::from).for_each(|d| {
         current = Point::new(&current, &d);
         points.push(current);
     });
@@ -39,7 +39,7 @@ struct Intersection {
     steps2: u64,
 }
 
-fn find_intersections(points1: &Vec<Point>, points2: &Vec<Point>) -> Vec<Intersection> {
+fn find_intersections(points1: &[Point], points2: &[Point]) -> Vec<Intersection> {
     let mut intersections: Vec<Intersection> = vec![];
     let mut steps1 = 0;
     for line1 in points1.windows(2) {
@@ -49,7 +49,7 @@ fn find_intersections(points1: &Vec<Point>, points2: &Vec<Point>) -> Vec<Interse
                 let intersection_steps1 = steps1 + steps(&line1[0], &point);
                 let intersection_steps2 = steps2 + steps(&line2[0], &point);
                 intersections.push(Intersection {
-                    point: point,
+                    point,
                     steps1: intersection_steps1,
                     steps2: intersection_steps2,
                 });
@@ -65,7 +65,7 @@ fn steps(point1: &Point, point2: &Point) -> u64 {
     ((point2.x - point1.x).abs() + (point2.y - point1.y).abs()) as u64
 }
 
-fn min_manhattan_distance(wire1: &Vec<Point>, wire2: &Vec<Point>) -> u64 {
+fn min_manhattan_distance(wire1: &[Point], wire2: &[Point]) -> u64 {
     let intersections = find_intersections(wire1, wire2);
     intersections
         .iter()
@@ -75,7 +75,7 @@ fn min_manhattan_distance(wire1: &Vec<Point>, wire2: &Vec<Point>) -> u64 {
         .unwrap_or(0)
 }
 
-fn min_steps(wire1: &Vec<Point>, wire2: &Vec<Point>) -> u64 {
+fn min_steps(wire1: &[Point], wire2: &[Point]) -> u64 {
     let intersections = find_intersections(wire1, wire2);
     intersections
         .iter()

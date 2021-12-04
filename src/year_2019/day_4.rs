@@ -69,7 +69,7 @@ fn get_digits(num: u64) -> Vec<u8> {
     let mut current = num;
     while 0 < current {
         digits.push((current % 10) as u8);
-        current = current / 10;
+        current /= 10;
     }
     digits.into_iter().rev().collect()
 }
