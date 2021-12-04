@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
@@ -6,7 +7,7 @@ pub fn part_1() -> i64 {
     let file = File::open("input/year_2021/day_03_1.txt").expect("Could not open input file.");
     let mut reader = BufReader::new(file);
     let binary_numbers = parse_input(&mut reader);
-    find_power_consumption(&binary_numbers)
+    get_power_consumption(&binary_numbers)
 }
 
 fn parse_input<R: BufRead>(reader: &mut R) -> Vec<String> {
@@ -16,33 +17,52 @@ fn parse_input<R: BufRead>(reader: &mut R) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-fn find_power_consumption(binary_numbers: &[String]) -> i64 {
-    let ratio: Vec<i64> =
-        binary_numbers
-            .iter()
-            .fold(vec![0; binary_numbers[0].len()], |acc, elem| {
-                acc.iter()
-                    .zip(elem.chars())
-                    .map(|(a, c)| if c == '1' { a + 1 } else { a - 1 })
-                    .collect()
-            });
-
-    let gamma = get_gamma(&ratio);
-    let epsilon = get_epsilon(&ratio);
+fn get_power_consumption(binary_numbers: &[String]) -> i64 {
+    let counts = count_chars(binary_numbers);
+    let gamma = get_gamma(&counts);
+    let epsilon = get_epsilon(&counts);
     gamma * epsilon
 }
 
-fn get_gamma(ratio: &[i64]) -> i64 {
-    let most_common_bits: String = ratio
+fn count_chars(strings: &[String]) -> Vec<HashMap<char, i64>> {
+    strings
         .iter()
-        .map(|&r| if 0 < r { '1' } else { '0' })
+        .fold(vec![HashMap::new(); strings[0].len()], |mut acc, elem| {
+            acc.iter_mut()
+                .zip(elem.chars())
+                .for_each(|(a, c)| *a.entry(c).or_insert(0) += 1);
+            acc
+        })
+}
+
+fn get_gamma(counts: &[HashMap<char, i64>]) -> i64 {
+    let most_common_bits: String = counts
+        .iter()
+        .map(|c| {
+            let count_zeros = c.get(&'0').unwrap_or(&0);
+            let count_ones = c.get(&'1').unwrap_or(&0);
+            if count_zeros < count_ones {
+                '1'
+            } else {
+                '0'
+            }
+        })
         .collect();
     i64::from_str_radix(&most_common_bits, 2).expect("Could not parse gamma")
 }
-fn get_epsilon(ratio: &[i64]) -> i64 {
-    let least_common_bits: String = ratio
+
+fn get_epsilon(counts: &[HashMap<char, i64>]) -> i64 {
+    let least_common_bits: String = counts
         .iter()
-        .map(|&r| if r < 0 { '1' } else { '0' })
+        .map(|c| {
+            let count_zeros = c.get(&'0').unwrap_or(&0);
+            let count_ones = c.get(&'1').unwrap_or(&0);
+            if count_ones < count_zeros {
+                '1'
+            } else {
+                '0'
+            }
+        })
         .collect();
     i64::from_str_radix(&least_common_bits, 2).expect("Could not parse epsilon")
 }
@@ -67,7 +87,7 @@ mod tests {
             String::from("00010"),
             String::from("01010"),
         ];
-        assert_eq!(find_power_consumption(&input), 198);
+        assert_eq!(get_power_consumption(&input), 198);
     }
 
     #[test]
