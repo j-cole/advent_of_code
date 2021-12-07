@@ -6,7 +6,15 @@ pub fn part_1() -> i64 {
     let input =
         fs::read_to_string("input/year_2021/day_05_1.txt").expect("Could not read input file.");
     let lines = parse_input(&input);
-    count_dangerous_points(&lines)
+    count_dangerous_points_part_1(&lines)
+}
+
+#[allow(dead_code)]
+pub fn part_2() -> i64 {
+    let input =
+        fs::read_to_string("input/year_2021/day_05_1.txt").expect("Could not read input file.");
+    let lines = parse_input(&input);
+    count_dangerous_points_part_2(&lines)
 }
 
 fn parse_input(input: &str) -> Vec<Line> {
@@ -52,7 +60,7 @@ struct Line {
     p2: Point,
 }
 
-fn count_dangerous_points(lines: &[Line]) -> i64 {
+fn count_dangerous_points_part_1(lines: &[Line]) -> i64 {
     let floor_size = 1000;
     lines
         .iter()
@@ -77,8 +85,41 @@ fn count_dangerous_points(lines: &[Line]) -> i64 {
         .count() as i64
 }
 
+fn count_dangerous_points_part_2(lines: &[Line]) -> i64 {
+    let floor_size = 1000;
+    lines
+        .iter()
+        .fold(vec![vec![0; floor_size]; floor_size], |mut acc, elem| {
+            let x1 = elem.p1.x;
+            let x2 = elem.p2.x;
+            let y1 = elem.p1.y;
+            let y2 = elem.p2.y;
+            let num_points = i64::max(i64::abs(x2 - x1), i64::abs(y2 - y1)) as usize + 1;
+            use std::cmp::Ordering;
+            let range_x: Vec<i64> = match x1.cmp(&x2) {
+                Ordering::Less => (x1..=x2).collect(),
+                Ordering::Equal => vec![x1; num_points],
+                Ordering::Greater => (x2..=x1).rev().collect(),
+            };
+            let range_y: Vec<i64> = match y1.cmp(&y2) {
+                Ordering::Less => (y1..=y2).collect(),
+                Ordering::Equal => vec![y1; num_points],
+                Ordering::Greater => (y2..=y1).rev().collect(),
+            };
+            range_y
+                .iter()
+                .zip(range_x.iter())
+                .for_each(|(y, x)| acc[*y as usize][*x as usize] += 1);
+            acc
+        })
+        .into_iter()
+        .flatten()
+        .filter(|f| 1 < *f)
+        .count() as i64
+}
+
 #[cfg(test)]
-mod part_1 {
+mod tests {
     use super::*;
 
     fn create_example_lines() -> Vec<Line> {
@@ -125,33 +166,51 @@ mod part_1 {
             },
         ]
     }
+    mod part_1 {
+        use super::*;
 
-    #[test]
-    fn parse_example_input() {
-        let input = "\
-            0,9 -> 5,9\n\
-            8,0 -> 0,8\n\
-            9,4 -> 3,4\n\
-            2,2 -> 2,1\n\
-            7,0 -> 7,4\n\
-            6,4 -> 2,0\n\
-            0,9 -> 2,9\n\
-            3,4 -> 1,4\n\
-            0,0 -> 8,8\n\
-            5,5 -> 8,2\n\
-        ";
-        let expected_output: Vec<Line> = create_example_lines();
-        assert_eq!(parse_input(input), expected_output);
+        #[test]
+        fn parse_example_input() {
+            let input = "\
+                0,9 -> 5,9\n\
+                8,0 -> 0,8\n\
+                9,4 -> 3,4\n\
+                2,2 -> 2,1\n\
+                7,0 -> 7,4\n\
+                6,4 -> 2,0\n\
+                0,9 -> 2,9\n\
+                3,4 -> 1,4\n\
+                0,0 -> 8,8\n\
+                5,5 -> 8,2\n\
+            ";
+            let expected_output: Vec<Line> = create_example_lines();
+            assert_eq!(parse_input(input), expected_output);
+        }
+
+        #[test]
+        fn check_example_input() {
+            let input: Vec<Line> = create_example_lines();
+            assert_eq!(count_dangerous_points_part_1(&input), 5);
+        }
+
+        #[test]
+        fn check_answer() {
+            assert_eq!(part_1(), 5632);
+        }
     }
 
-    #[test]
-    fn check_example_input() {
-        let input: Vec<Line> = create_example_lines();
-        assert_eq!(count_dangerous_points(&input), 5);
-    }
+    mod part_2 {
+        use super::*;
 
-    #[test]
-    fn check_answer() {
-        assert_eq!(part_1(), 5632);
+        #[test]
+        fn check_example_input() {
+            let input: Vec<Line> = create_example_lines();
+            assert_eq!(count_dangerous_points_part_2(&input), 12);
+        }
+
+        #[test]
+        fn check_answer() {
+            assert_eq!(part_2(), 22213);
+        }
     }
 }
