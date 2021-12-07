@@ -18,21 +18,11 @@ pub fn part_2() -> i64 {
 }
 
 fn parse_input(input: &str) -> Vec<Line> {
-    let re = Regex::new(r"^(\d+),(\d+) -> (\d+),(\d+)$").expect("Could not create regex.");
-    input
-        .lines()
-        .filter_map(|line| re.captures(line))
+    let re = Regex::new(r"(\d+),(\d+) -> (\d+),(\d+)").expect("Could not create regex.");
+    re.captures_iter(input)
         .map(|caps| {
-            let values: Vec<i64> = caps
-                .iter()
-                .flatten()
-                .skip(1)
-                .map(|regex_match| {
-                    regex_match
-                        .as_str()
-                        .parse::<i64>()
-                        .expect("Could not parse line value.")
-                })
+            let values: Vec<i64> = (1..=4)
+                .map(|i| caps[i].parse::<i64>().expect("Could not parse line value."))
                 .collect();
             Line {
                 p1: Point {
