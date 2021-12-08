@@ -1,5 +1,5 @@
 use advent_of_code::year_2021;
 
 fn main() {
-    year_2021::day_06::part_2();
+    year_2021::day_07::part_1();
 }
